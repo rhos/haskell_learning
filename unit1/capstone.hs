@@ -64,5 +64,4 @@ printRobots robotList = map printRobot robotList
 partyFight attacker defenders = map doFight defenders
   where
     doFight = fight attacker
-
---TODO: threeRoundFight
+    --TODO: threeRoundFight
