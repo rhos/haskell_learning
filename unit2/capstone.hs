@@ -44,3 +44,92 @@ intToBits' n =
   where
     remainder = n `mod` 2
     nextVal = n `div` 2
+
+maxBits :: Int
+maxBits = length (intToBits' maxBound)
+
+intToBits :: Int -> Bits
+intToBits n = leadingFalses ++ reversedBits
+  where
+    reversedBits = reverse (intToBits' n)
+    missingBits = maxBits - (length reversedBits)
+    leadingFalses = take missingBits (cycle [False])
+
+charToBits :: Char -> Bits
+charToBits char = intToBits (fromEnum char)
+
+bitsToInt :: Bits -> Int
+bitsToInt bits = sum (map (\x -> 2 ^ (snd x)) trueLocations)
+  where
+    size = length bits
+    indices = [size - 1,size - 2 .. 0]
+    trueLocations = filter (\x -> fst x == True) (zip bits indices)
+
+bitsToChar :: Bits -> Char
+bitsToChar bits = toEnum (bitsToInt bits)
+
+myPad :: String
+myPad = "Shhhhhh"
+
+myPlainText :: String
+myPlainText = "Haskell"
+
+applyOTP' :: String -> String -> [Bits]
+applyOTP' pad plaintext =
+  map (\pair -> (fst pair) `xor` (snd pair)) (zip padBits plaintextBits)
+  where
+    padBits = map charToBits pad
+    plaintextBits = map charToBits plaintext
+
+applyOTP :: String -> String -> String
+applyOTP pad plaintext = map bitsToChar bitList
+  where
+    bitList = applyOTP' pad plaintext
+
+encoderDecoder :: String -> String
+encoderDecoder = applyOTP myPad
+
+class Cipher a where
+  encode :: a -> String -> String
+  decode :: a -> String -> String
+
+data OneTimePad =
+  OTP String
+
+instance Cipher OneTimePad where
+  encode (OTP pad) text = applyOTP pad text
+  decode (OTP pad) text = applyOTP pad text
+
+myOTP :: OneTimePad
+myOTP = OTP (cycle [minBound .. maxBound])
+
+prng :: Int -> Int -> Int -> Int -> Int
+prng a b maxNumber seed = (a * seed + b) `mod` maxNumber
+
+prngStream :: StreamCipher -> [Int]
+prngStream (SC a b maxNumber seed) = rv : next
+  where
+    rv = prng a b maxNumber seed
+    next = prngStream (SC a b maxNumber rv)
+
+generatePad :: StreamCipher -> Int -> String
+generatePad sc length = map toEnum ints
+  where
+    ints = take length (prngStream sc)
+
+data StreamCipher =
+  SC Int
+     Int
+     Int
+     Int
+
+instance Cipher StreamCipher where
+  encode sc text = applyOTP pad text
+    where
+      pad = generatePad sc (length text)
+
+  decode sc text = applyOTP pad text
+    where
+      pad = generatePad sc (length text)
+
+mySC = SC 1337 7 100 12345
