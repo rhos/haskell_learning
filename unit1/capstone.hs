@@ -65,6 +65,5 @@ partyFight attacker defenders = map doFight defenders
   where
     doFight = fight attacker
 
-threeRoundFight r1 r2 = 
-  (\r1 r2 -> fight r1 r2) r1 r2
+threeRoundFight r1 r2 = (\r1 r2 -> fight r1 r2) r1 r2
     --TODO: threeRoundFight
