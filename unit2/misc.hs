@@ -20,3 +20,14 @@ qsort (x:xs) = qsort less ++ [x] ++ qsort more
   where
     less = filter (< x) xs
     more = filter (>= x) xs
+
+mean :: (Floating a) => [a] -> a
+mean xs = sum xs / (fromIntegral . length) xs
+
+var :: (Floating a) => [a] -> a
+var xs = (sum $ map (\x -> (x - m) ^ 2) xs) / (fromIntegral (length xs) - 1)
+  where
+    m = mean xs
+
+stddev :: (Floating a) => [a] -> a
+stddev xs = sqrt $ var xs
