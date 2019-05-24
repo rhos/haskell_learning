@@ -84,3 +84,8 @@ organCounts = map countOrgan allOrgans
 
 organInventory :: Map.Map Organ Int
 organInventory = Map.fromList (zip allOrgans organCounts)
+
+intercalate :: [a] -> [[a]] -> [a]
+intercalate separator (f:others) = foldl combiner f others
+    where
+      combiner = (\x y -> mconcat [x, separator, y])

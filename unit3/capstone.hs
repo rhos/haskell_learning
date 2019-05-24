@@ -241,11 +241,19 @@ movingMedianTS (TS times values) n = TS times smoothedValues
     nothings = replicate (n `div` 2) Nothing
     smoothedValues = mconcat [nothings, ma, nothings]
 
--- stDev :: [Float] -> Float
--- stDev xs = sqrt (diffsSum / (leng-1))
---   where
---     leng = (realToFrac . length) xs
---     average = (\xs -> sum xs / leng)
---     avr = average xs
---     diffs = map (\x -> (x - avr)^2) xs
---     diffsSum = sum diffs
+stDev :: [Float] -> Float
+stDev xs = sqrt (diffsSum / (leng-1))
+  where
+    leng = (realToFrac . length) xs
+    average = (\xs -> sum xs / leng)
+    avr = average xs
+    diffs = map (\x -> (x - avr)^2) xs
+    diffsSum = sum diffs
+
+stddev :: [Double] -> Double
+stddev xs = sqrt $ var xs
+
+var :: [Double] -> Double
+var xs = (sum $ map (\x -> (x - m)^2) xs) / (fromIntegral (length xs)-1)
+    where
+      m = mean xs
