@@ -50,7 +50,7 @@ maybeMain :: Maybe String
 maybeMain = do
   size1 <- Map.lookup 1 sizeData
   cost1 <- Map.lookup 1 costData
-  size2 <- Map.lookup 2 sizeData
+  size2 <- Map.lookup 3 sizeData
   cost2 <- Map.lookup 2 costData
   let pizza1 = (size1, cost1)
   let pizza2 = (size2, cost2)
