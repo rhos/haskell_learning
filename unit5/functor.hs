@@ -102,3 +102,19 @@ main = do
   id <- getArgs
   let part = Map.lookup (read $ head id) partsDB
   printCost (cost <$> part)
+
+primes :: [Integer]
+primes = sieve [2 ..]
+  where sieve (p : xs) = p : sieve [ x | x <- xs, x `mod` p > 0 ]
+
+
+main2 :: IO ()
+main2 = do
+  putStrLn "enter a part number 1"
+  partNo1 <- getLine
+  putStrLn "enter a part number 2"
+  partNo2 <- getLine
+  let part1    = Map.lookup (read partNo1) partsDB
+  let part2    = Map.lookup (read partNo2) partsDB
+  let cheapest = min <$> (cost <$> part1) <*> (cost <$> part2)
+  printCost cheapest
