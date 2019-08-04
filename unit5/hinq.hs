@@ -79,7 +79,31 @@ _join data1 data2 prop1 prop2 = do
   return dpairs
 
 data HINQ m a b = HINQ (m a -> m b) (m a) (m a -> m a)
-  | HINQ_ (m a -> m b) (m a)
+  | HINQ_ (m a -> m b) (m a) | Empty
+
+combineHINQ
+  :: (Monad m, Alternative m) => HINQ m a b -> HINQ m a b -> HINQ m a b
+combineHINQ Empty           _               = Empty
+combineHINQ _               Empty           = Empty
+combineHINQ (HINQ s1 j1 w1) (HINQ s2 j2 w2) = (HINQ s j w)
+ where
+  j = j1 <|> j2
+  s = \w -> (s1 w) <|> (s2 w)
+  w = \j -> (w1 j) <|> (w2 j)
+combineHINQ (HINQ_ s1 j1) (HINQ_ s2 j2) = combineHINQ
+  (HINQ s1 j1 (_where (\_ -> True)))
+  (HINQ s2 j2 (_where (\_ -> True)))
+combineHINQ (HINQ s1 j1 w1) (HINQ_ s2 j2) =
+  combineHINQ (HINQ s1 j1 w1) (HINQ s1 j1 (_where (\_ -> True)))
+combineHINQ (HINQ_ s1 j1) (HINQ s2 j2 w2) =
+  combineHINQ (HINQ s1 j1 (_where (\_ -> True))) (HINQ_ s2 j2)
+
+instance (Monad m, Alternative m) => Semigroup (HINQ m a b) where
+  (<>) = combineHINQ
+
+instance (Monad m, Alternative m) => Monoid (HINQ m a b) where
+  mempty  = Empty
+  mappend = (<>)
 
 _hinq selectQuery joinQuery whereQuery =
   (\joinData -> (\whereResult -> selectQuery whereResult) $ whereQuery joinData)
@@ -88,6 +112,7 @@ _hinq selectQuery joinQuery whereQuery =
 runHINQ :: (Monad m, Alternative m) => HINQ m a b -> m b
 runHINQ (HINQ sClause jClause wClause) = _hinq sClause jClause wClause
 runHINQ (HINQ_ sClause jClause) = _hinq sClause jClause (_where (\_ -> True))
+runHINQ Empty = empty
 
 query1 :: HINQ [] (Teacher, Course) Name
 query1 = HINQ (_select (teacherName . fst))
@@ -107,6 +132,10 @@ maybeQuery1 :: HINQ Maybe (Teacher, Course) Name
 maybeQuery1 = HINQ (_select (teacherName . fst))
                    (_join possibleTeacher possibleCourse teacherId teacher)
                    (_where ((== "French") . courseTitle . snd))
+
+
+emptyQ :: HINQ [] ((Name, Int), Course) Name
+emptyQ = Empty
 
 missingCourse :: Maybe Course
 missingCourse = Nothing
