@@ -24,6 +24,7 @@ dependencies:
 
 default-extensions:
 - OverloadedStrings
+- DeriveGeneric
 
 library:
   source-dirs: src
@@ -40,6 +41,8 @@ executables:
     - noaa
     - bytestring
     - http-conduit
+    - aeson
+    - text
 
 
 tests:
