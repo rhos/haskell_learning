@@ -1,3 +1,5 @@
 {
-    "python.pythonPath": "C:\\Users\\rhos\\scoop\\shims\\python.exe"
+    "python.pythonPath": "C:\\Users\\itazitdinov\\scoop\\shims\\python.exe",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
 }
